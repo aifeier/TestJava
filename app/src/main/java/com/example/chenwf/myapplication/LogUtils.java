@@ -1,5 +1,7 @@
 package com.example.chenwf.myapplication;
 
+import android.util.Log;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -67,7 +69,11 @@ public class LogUtils {
     }
 
     public static void i(String tag, String msg) {
-        getInstance().log(LogLevel.INFO, tag, msg);
+        i(tag, msg, null);
+    }
+
+    public static void i(String tag, String msg, Throwable tr) {
+        getInstance().log(LogLevel.INFO, tag, msg, tr);
     }
 
     public static void d(String msg) {
@@ -75,7 +81,11 @@ public class LogUtils {
     }
 
     public static void d(String tag, String msg) {
-        getInstance().log(LogLevel.DEBUG, tag, msg);
+        d(tag, msg, null);
+    }
+
+    public static void d(String tag, String msg, Throwable tr) {
+        getInstance().log(LogLevel.DEBUG, tag, msg, tr);
     }
 
     public static void w(String msg) {
@@ -83,7 +93,11 @@ public class LogUtils {
     }
 
     public static void w(String tag, String msg) {
-        getInstance().log(LogLevel.WARNING, tag, msg);
+        w("", msg, null);
+    }
+
+    public static void w(String tag, String msg, Throwable tr) {
+        getInstance().log(LogLevel.WARNING, tag, msg, tr);
     }
 
     public static void e(String msg) {
@@ -91,7 +105,11 @@ public class LogUtils {
     }
 
     public static void e(String tag, String msg) {
-        getInstance().log(LogLevel.ERROR, tag, msg);
+        e("", msg, null);
+    }
+
+    public static void e(String tag, String msg, Throwable tr) {
+        getInstance().log(LogLevel.ERROR, tag, msg, tr);
     }
 
     public static void f(String msg) {
@@ -99,32 +117,42 @@ public class LogUtils {
     }
 
     public static void f(String tag, String msg) {
-        getInstance().log(LogLevel.FATAL, tag, msg);
+        f("", msg, null);
     }
 
-    private void log(LogLevel logLevel, String tag, String msg) {
+    public static void f(String tag, String msg, Throwable tr) {
+        getInstance().log(LogLevel.FATAL, tag, msg, tr);
+    }
 
-        String log = getCurrentTimeStr() + " " + logLevel.toString() + " " + tag + " : " + msg + "\r\n";
-        switch (logType) {
-            case FILE:
-                switch (logLevel) {
-                    case ERROR:
-                        writeToFile(errorFile, log);
-                        break;
-                    case FATAL:
-                        writeToFile(fatalFile, log);
-                        break;
-                    default:
-                        writeToFile(outFile, log);
-                }
-                break;
-            case CONSOLE:
-                System.out.print(log);
-                break;
+    private void log(LogLevel logLevel, String tag, String msg, Throwable tr) {
+        try {
+            String log = getCurrentTimeStr() + " " + logLevel.toString() + " " + tag + " : " + msg + "\r\n";
+            switch (logType) {
+                case FILE:
+                    switch (logLevel) {
+                        case ERROR:
+                            writeToFile(errorFile, log, tr);
+                            break;
+                        case FATAL:
+                            writeToFile(fatalFile, log, tr);
+                            break;
+                        default:
+                            writeToFile(outFile, log, tr);
+                    }
+                    break;
+                case CONSOLE:
+                    System.out.print(log);
+                    break;
+            }
+        }catch (Throwable e){
+            e.printStackTrace();
+            if(null != tr){
+                tr. printStackTrace();
+            }
         }
     }
 
-    private void writeToFile(File file, String log) {
+    private void writeToFile(File file, String log, Throwable tr) {
         if (null == file) {
             return;
         }
@@ -152,13 +180,12 @@ public class LogUtils {
         }
     }
 
-
-    public String getCurrentTimeStr() {
+    public String getCurrentTimeStr() throws Throwable{
         String nanoTime = String.valueOf(System.nanoTime());
         return formatter.format(new Date()) + nanoTime.substring(nanoTime.length() - 6, nanoTime.length());
     }
 
-    public static enum LogType {
+    public enum LogType {
         CONSOLE,
         FILE
     }
