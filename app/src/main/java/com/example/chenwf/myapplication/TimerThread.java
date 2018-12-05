@@ -29,7 +29,7 @@ class TimerThread extends Thread {
             var9 = false;
         } finally {
             if (var9) {
-                TaskQueue var4 = this.queue;
+                TaskQueue queue = this.queue;
                 synchronized (this.queue) {
                     this.newTasksMayBeScheduled = false;
                     this.queue.clear();
@@ -37,7 +37,7 @@ class TimerThread extends Thread {
             }
         }
 
-        TaskQueue var1 = this.queue;
+        TaskQueue queue = this.queue;
         synchronized (this.queue) {
             this.newTasksMayBeScheduled = false;
             this.queue.clear();
@@ -48,11 +48,11 @@ class TimerThread extends Thread {
         while (true) {
             while (true) {
                 try {
-                    TaskQueue var3 = this.queue;
-                    TimerTask var1;
-                    boolean var2;
+                    TaskQueue queue = this.queue;
+                    TimerTask task;
+                    boolean nextExecutionTime;
                     synchronized (this.queue) {
-                        if(frequency <= 0){
+                        if (frequency <= 0) {
                             //关闭计时器
                             newTasksMayBeScheduled = false;
                             this.queue.clear();
@@ -67,36 +67,36 @@ class TimerThread extends Thread {
                             return;
                         }
 
-                        var1 = this.queue.getMin();
-                        Object var8 = var1.lock;
-                        long var4;
-                        long var6;
-                        synchronized (var1.lock) {
-                            if (var1.state == 3) {
+                        task = this.queue.getMin();
+                        Object var8 = task.lock;
+                        long currentTimeMillis;
+                        long currentNextExecutionTime;
+                        synchronized (task.lock) {
+                            if (task.state == 3) {
                                 this.queue.removeMin();
                                 continue;
                             }
 
-                            var4 = System.currentTimeMillis();
-                            var6 = var1.nextExecutionTime;
-                            if (var2 = var6 <= var4) {
-                                if (var1.period == 0L) {
+                            currentTimeMillis = System.currentTimeMillis();
+                            currentNextExecutionTime = task.nextExecutionTime;
+                            if (nextExecutionTime = currentNextExecutionTime <= currentTimeMillis) {
+                                if (task.period == 0L) {
                                     this.queue.removeMin();
-                                    var1.state = 2;
+                                    task.state = 2;
                                 } else {
-                                    this.queue.rescheduleMin(var1.period < 0L ? var4 - var1.period : var6 + var1.period);
+                                    this.queue.rescheduleMin(task.period < 0L ? currentTimeMillis - task.period : currentNextExecutionTime + task.period);
                                 }
                             }
                         }
 
-                        if (!var2) {
-                            this.queue.wait(var6 - var4);
+                        if (!nextExecutionTime) {
+                            this.queue.wait(currentNextExecutionTime - currentTimeMillis);
                         }
                     }
 
-                    if (var2) {
-                        System.out.println(frequency--%2==0?"偶数":"奇数");
-                        var1.run();
+                    if (nextExecutionTime) {
+                        System.out.println(frequency-- % 2 == 0 ? "偶数" : "奇数");
+                        task.run();
                     }
                 } catch (InterruptedException var13) {
                     ;

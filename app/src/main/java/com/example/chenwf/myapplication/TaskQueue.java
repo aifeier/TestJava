@@ -18,12 +18,13 @@ class TaskQueue {
         return this.size;
     }
 
-    void add(TimerTask var1) {
+    //添加task
+    void add(TimerTask task) {
         if (this.size + 1 == this.queue.length) {
             this.queue = (TimerTask[]) Arrays.copyOf(this.queue, 2 * this.queue.length);
         }
 
-        this.queue[++this.size] = var1;
+        this.queue[++this.size] = task;
         this.fixUp(this.size);
     }
 
@@ -31,8 +32,8 @@ class TaskQueue {
         return this.queue[1];
     }
 
-    TimerTask get(int var1) {
-        return this.queue[var1];
+    TimerTask get(int index) {
+        return this.queue[index];
     }
 
     void removeMin() {
@@ -41,15 +42,8 @@ class TaskQueue {
         this.fixDown(1);
     }
 
-    void quickRemove(int var1) {
-        assert var1 <= this.size;
-
-        this.queue[var1] = this.queue[this.size];
-        this.queue[this.size--] = null;
-    }
-
-    void rescheduleMin(long var1) {
-        this.queue[1].nextExecutionTime = var1;
+    void rescheduleMin(long nextExecutionTime) {
+        this.queue[1].nextExecutionTime = nextExecutionTime;
         this.fixDown(1);
     }
 
@@ -65,15 +59,15 @@ class TaskQueue {
         this.size = 0;
     }
 
-    private void fixUp(int var1) {
+    private void fixUp(int size) {
         while(true) {
-            if (var1 > 1) {
-                int var2 = var1 >> 1;
-                if (this.queue[var2].nextExecutionTime > this.queue[var1].nextExecutionTime) {
-                    TimerTask var3 = this.queue[var2];
-                    this.queue[var2] = this.queue[var1];
-                    this.queue[var1] = var3;
-                    var1 = var2;
+            if (size > 1) {
+                int next = size >> 1;
+                if (this.queue[next].nextExecutionTime > this.queue[size].nextExecutionTime) {
+                    TimerTask nextTask = this.queue[next];
+                    this.queue[next] = this.queue[size];
+                    this.queue[size] = nextTask;
+                    size = next;
                     continue;
                 }
             }
@@ -82,31 +76,24 @@ class TaskQueue {
         }
     }
 
-    private void fixDown(int var1) {
+    private void fixDown(int index) {
         while(true) {
-            int var2;
-            if ((var2 = var1 << 1) <= this.size && var2 > 0) {
-                if (var2 < this.size && this.queue[var2].nextExecutionTime > this.queue[var2 + 1].nextExecutionTime) {
-                    ++var2;
+            int front;
+            if ((front = index << 1) <= this.size && front > 0) {
+                if (front < this.size && this.queue[front].nextExecutionTime > this.queue[front + 1].nextExecutionTime) {
+                    ++front;
                 }
 
-                if (this.queue[var1].nextExecutionTime > this.queue[var2].nextExecutionTime) {
-                    TimerTask var3 = this.queue[var2];
-                    this.queue[var2] = this.queue[var1];
-                    this.queue[var1] = var3;
-                    var1 = var2;
+                if (this.queue[index].nextExecutionTime > this.queue[front].nextExecutionTime) {
+                    TimerTask frontTask = this.queue[front];
+                    this.queue[front] = this.queue[index];
+                    this.queue[index] = frontTask;
+                    index = front;
                     continue;
                 }
             }
 
             return;
         }
-    }
-
-    void heapify() {
-        for(int var1 = this.size / 2; var1 >= 1; --var1) {
-            this.fixDown(var1);
-        }
-
     }
 }
