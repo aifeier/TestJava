@@ -25,8 +25,9 @@ public class Timer {
             @Override
             public void run() {
                 //do somethings
+                System.out.println(System.currentTimeMillis());
             }
-        }, 100, 500, 5);
+        }, 0, 1, 5);
     }
 
     private final TaskQueue queue;
