@@ -52,8 +52,8 @@ class TaskQueue {
     }
 
     void clear() {
-        for(int var1 = 1; var1 <= this.size; ++var1) {
-            this.queue[var1] = null;
+        for(int i = 1; i <= this.size; ++i) {
+            this.queue[i] = null;
         }
 
         this.size = 0;

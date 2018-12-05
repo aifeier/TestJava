@@ -11,8 +11,8 @@ class TimerThread extends Thread {
     private TaskQueue queue;
     private long frequency;
 
-    TimerThread(TaskQueue var1) {
-        this.queue = var1;
+    TimerThread(TaskQueue queue) {
+        this.queue = queue;
         frequency = Integer.MAX_VALUE;
     }
 
@@ -21,14 +21,14 @@ class TimerThread extends Thread {
     }
 
     public void run() {
-        boolean var9 = false;
+        boolean fail = false;
 
         try {
-            var9 = true;
+            fail = true;
             this.mainLoop();
-            var9 = false;
+            fail = false;
         } finally {
-            if (var9) {
+            if (fail) {
                 TaskQueue queue = this.queue;
                 synchronized (this.queue) {
                     this.newTasksMayBeScheduled = false;
@@ -68,7 +68,7 @@ class TimerThread extends Thread {
                         }
 
                         task = this.queue.getMin();
-                        Object var8 = task.lock;
+                        Object lock = task.lock;
                         long currentTimeMillis;
                         long currentNextExecutionTime;
                         synchronized (task.lock) {
@@ -98,7 +98,7 @@ class TimerThread extends Thread {
                         System.out.println(frequency-- % 2 == 0 ? "偶数" : "奇数");
                         task.run();
                     }
-                } catch (InterruptedException var13) {
+                } catch (InterruptedException e) {
                     ;
                 }
             }
